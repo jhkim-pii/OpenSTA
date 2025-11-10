@@ -136,15 +136,15 @@ typedef Set<InputDelay*> InputDelaySet;
 typedef Map<const Pin*, InputDelaySet*, PinIdLess> InputDelaysPinMap;
 typedef Set<OutputDelay*> OutputDelaySet;
 typedef Map<const Pin*,OutputDelaySet*, PinIdLess> OutputDelaysPinMap;
-typedef UnorderedMap<const Pin*,ExceptionPathSet*> PinExceptionsMap;
-typedef Map<const Clock*,ExceptionPathSet*> ClockExceptionsMap;
-typedef Map<const Instance*,ExceptionPathSet*> InstanceExceptionsMap;
-typedef Map<const Net*,ExceptionPathSet*> NetExceptionsMap;
-typedef UnorderedMap<EdgePins, ExceptionPathSet*,
+typedef UnorderedMap<const Pin*,ExceptionPathSet> PinExceptionsMap;
+typedef UnorderedMap<const Clock*,ExceptionPathSet> ClockExceptionsMap;
+typedef UnorderedMap<const Instance*,ExceptionPathSet> InstanceExceptionsMap;
+typedef UnorderedMap<const Net*,ExceptionPathSet> NetExceptionsMap;
+typedef UnorderedMap<EdgePins, ExceptionPathSet,
 		     PinPairHash, PinPairEqual> EdgeExceptionsMap;
 typedef Vector<ExceptionThru*> ExceptionThruSeq;
 typedef Map<const Port*,InputDrive*> InputDriveMap;
-typedef Map<int, ExceptionPathSet*, std::less<int> > ExceptionPathPtHash;
+typedef Map<size_t, ExceptionPathSet, std::less<size_t>> ExceptionPathPtHash;
 typedef Set<ClockLatency*, ClockLatencyLess> ClockLatencies;
 typedef Map<const Pin*, ClockUncertainties*> PinClockUncertaintyMap;
 typedef Set<InterClockUncertainty*, InterClockUncertaintyLess> InterClockUncertaintySet;
@@ -1018,7 +1018,7 @@ public:
   const PinSet &pathDelayInternalFrom() const;
   bool isPathDelayInternalTo(const Pin *pin) const;
   bool isPathDelayInternalToBreak(const Pin *pin) const;
-  ExceptionPathSet *exceptions() { return &exceptions_; }
+  ExceptionPathSet &exceptions() { return exceptions_; }
   void deleteExceptions();
   void deleteException(ExceptionPath *exception);
   void recordException(ExceptionPath *exception);
@@ -1043,7 +1043,6 @@ protected:
   void removeLibertyAnnotations();
   void deleteExceptionsReferencing(Clock *clk);
   void deleteClkPinMappings(Clock *clk);
-  void deleteExceptionPtHashMapSets(ExceptionPathPtHash &map);
   void makeClkPinMappings(Clock *clk);
   void deletePinClocks(Clock *defining_clk,
                        PinSet *pins);
@@ -1054,6 +1053,7 @@ protected:
   ExceptionPath *findMergeMatch(ExceptionPath *exception);
   void addException1(ExceptionPath *exception);
   void addException2(ExceptionPath *exception);
+  void recordExceptionPins(ExceptionPath *exception);
   void recordPathDelayInternalFrom(ExceptionPath *exception);
   void unrecordPathDelayInternalFrom(ExceptionPath *exception);
   bool pathDelayFrom(const Pin *pin);
@@ -1369,6 +1369,7 @@ protected:
   PinExceptionsMap first_to_pin_exceptions_;
   ClockExceptionsMap first_to_clk_exceptions_;
   InstanceExceptionsMap first_to_inst_exceptions_;
+  PinExceptionsMap pin_exceptions_;
   // Edges that traverse hierarchical exception pins.
   EdgeExceptionsMap first_thru_edge_exceptions_;
   // Exception hash with one missing from/thru/to point, used for merging.

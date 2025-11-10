@@ -821,9 +821,12 @@ public:
                                   // Number of paths to report for
                                   // each endpoint.
                                   int endpoint_path_count,
-                                  // endpoint_path_count paths report unique pins
-                                  // without rise/fall variations.
+                                  // endpoint_path_count paths report paths with
+				  // unique pins.
                                   bool unique_pins,
+                                  // endpoint_path_count paths report paths with
+				  // unique pins and rise/fall edges.
+				  bool unique_edges,
                                   // Min/max bounds for slack of
                                   // returned path ends.
                                   float slack_min,
@@ -904,9 +907,6 @@ public:
   PinSet endpointPins();
   VertexSet *endpoints();
   int endpointViolationCount(const MinMax *min_max);
-  // Find the fanin vertices for a group path.
-  // Vertices in the clock network are NOT included.
-  PinSet findGroupPathPins(const char *group_path_name);
   // Find all required times after updateTiming().
   void findRequireds();
   std::string reportDelayCalc(Edge *edge,
